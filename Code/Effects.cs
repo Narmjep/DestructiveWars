@@ -17,8 +17,8 @@ namespace DestructiveWars{
     public class Effects{
 
         public static float flamingArrowChance = 0.2f;
-        public static float pyromaniacChance = 0.2f;
-        public static float grenadeChance = 0.0f;
+        public static float pyromaniacChance = 0.3f;
+        public static float grenadeChance = 0.1f;
 
         public static bool ArrowSmallExplosion(BaseSimObject pSelf, BaseSimObject pTarget = null, WorldTile pTile = null){
             MapAction.damageWorld(pTile, 2, AssetManager.terraform.get("grenade"), null);
@@ -68,6 +68,12 @@ namespace DestructiveWars{
         [HarmonyPatch(typeof(ActionLibrary), nameof(ActionLibrary.bombermanEffect))]
         public static bool bombermanEffectPatch(BaseSimObject pTarget, WorldTile pTile){
             if (pTarget.a.has_attack_target) return true;
+            return false;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(MapBox), nameof(MapBox.startShake))]
+        public static bool removeShake(float pDuration = 0.3f, float pInterval = 0.01f, float pIntensity = 2f, bool pShakeX = false, bool pShakeY = true){
             return false;
         }
     }
