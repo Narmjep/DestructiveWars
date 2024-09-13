@@ -1,0 +1,9 @@
+{
+  "name": "Destrucvite Wars",
+  "author": "Narmjep",
+  "version": "1.0.0",
+  "startPoint": "Main.cs",
+  "description": "Explosive battles.",
+  "iconPath": "fire.png",
+  "targetGameBuild": 558
+}
