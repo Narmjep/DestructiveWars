@@ -3,7 +3,7 @@
   "author": "Narmjep",
   "version": "1.0.0",
   "startPoint": "Main.cs",
-  "description": "Explosive battles.",
+  "description": "Make your battles more destructive!",
   "iconPath": "fire.png",
   "targetGameBuild": 558
 }
