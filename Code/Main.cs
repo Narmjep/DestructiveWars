@@ -10,6 +10,8 @@ namespace DestructiveWars{
     [ModEntry]
     class Main : MonoBehaviour{
 
+        public const string VERSION = "1.1";
+
         public static Main instance;
 
         internal static Harmony harmony;
@@ -21,7 +23,7 @@ namespace DestructiveWars{
             Harmony.CreateAndPatchAll(typeof(Effects));
             Debug.Log(" ----------------- Patching done");
 
-            //Get arrow projectile
+            Config.Init();
             Effects.init();
             Debug.Log(" \n\n\n\n\n\nEffects initialized");
         }

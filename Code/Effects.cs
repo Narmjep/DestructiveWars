@@ -11,42 +11,42 @@ using UnityEngine;
 using System;
 using HarmonyLib;
 
+
 namespace DestructiveWars{
     public class Effects{
-
-        public static float flamingArrowChance = 0.1f;
-        public static float pyromaniacChance = 0.3f;
-        public static float grenadeChance = 0.1f;
         
-        private static bool RandomChance(double chance){
+        private static bool RandomChance(double chance)
+        {
             return UnityEngine.Random.value < chance;
         }
 
         public static bool ArrowSmallExplosion(BaseSimObject pSelf, BaseSimObject pTarget = null, WorldTile pTile = null)
         {
+            if (!Config.enableExplosiveArrow || !RandomChance(Config.explosiveArrowChance)) return true;
             MapAction.damageWorld(pTile, 2, AssetManager.terraform.get("grenade"), null);
-            EffectsLibrary.spawnAtTileRandomScale("fx_explosion_small", pTile, 0.03f, 0.06f);
+            EffectsLibrary.spawnAtTileRandomScale("fx_explosion_small", pTile, 0.02f, 0.03f);
             return true;
         }
 
         public static bool ArrowImpact(BaseSimObject pSelf, BaseSimObject pTarget = null, WorldTile pTile = null){
             //random
-            if (!RandomChance(flamingArrowChance)) return true;
+            if (!Config.enableFlamingArrow || !RandomChance(Config.flamingArrowChance)) return true;
             return ActionLibrary.burnTile(pSelf, pTarget, pTile);
         }
     	
         [HarmonyPostfix]
         [HarmonyPatch(typeof(City), "tryToMakeWarrior")]
-        public static void tryToMakeWarriorPatch(ref bool __result, Actor pActor){
+        public static void TryToMakeWarriorPatch(ref bool __result, Actor pActor){
             if (!__result) {
                 return;
             }
-
-            if (RandomChance(pyromaniacChance)){
-                pActor.addTrait("pyromaniac");
-            } else if (RandomChance(grenadeChance)){
+            
+            bool set_bomberman = Config.enableBomberman && RandomChance(Config.bombermanChance);
+            if (set_bomberman)
+            {
                 pActor.addTrait("bomberman");
             }
+
             __result = true;
         }
 
@@ -54,18 +54,13 @@ namespace DestructiveWars{
             //Get arrow projectile
             ProjectileAsset t = AssetManager.projectiles.get("arrow");
             t.impact_actions = (AttackAction)Delegate.Combine(t.impact_actions, new AttackAction(ArrowImpact));
-            t.hit_shake = false;
+            t.impact_actions = (AttackAction)Delegate.Combine(t.impact_actions, new AttackAction(ArrowSmallExplosion));
+            if (Config.removeShake)
+                t.hit_shake = false;
         } 
 
 
         //Debug
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(ActionLibrary), nameof(ActionLibrary.throwTorchAtTile))]
-        public static bool pyromaniacEffectPatch(BaseSimObject pSelf, WorldTile pTile){
-            if (pSelf.a.has_attack_target) return true;
-            return false;
-        }
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(ActionLibrary), nameof(ActionLibrary.throwBombAtTile))]
@@ -76,8 +71,13 @@ namespace DestructiveWars{
 
         [HarmonyPrefix]
         [HarmonyPatch(typeof(MapBox), nameof(MapBox.startShake))]
-        public static bool removeShake(float pDuration = 0.3f, float pInterval = 0.01f, float pIntensity = 2f, bool pShakeX = false, bool pShakeY = true){
-            return false;
+        public static bool RemoveShake(float pDuration = 0.3f, float pInterval = 0.01f, float pIntensity = 2f, bool pShakeX = false, bool pShakeY = true)
+        {
+            if (Config.removeShake)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
